@@ -64,4 +64,4 @@ app.post("/api/lead", async (req, res) => {
 
 app.get("/health", (req, res) => res.json({ ok: true }));
 
-app.listen(PORT, () => console.log(`Lead proxy listening on ${PORT}`));
+app.listen(PORT, "0.0.0.0", () => console.log(`Lead proxy listening on ${PORT}`));
