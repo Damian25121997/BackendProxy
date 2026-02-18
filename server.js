@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 3000;
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL; // secreto
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || ""; // ej: https://neutralops.cloud
 const SHARED_SECRET = process.env.SHARED_SECRET || ""; // opcional
+const N8N_WEBHOOK_TOKEN = process.env.N8N_WEBHOOK_TOKEN || "";
 
 // CORS básico (solo tu dominio)
 app.use((req, res, next) => {
@@ -44,9 +45,14 @@ app.post("/api/lead", async (req, res) => {
 
     const payload = { name, email, phone, message, subject, source_url, user_agent, timestamp };
 
+    const N8N_WEBHOOK_TOKEN = process.env.N8N_WEBHOOK_TOKEN || "";
+
     const r = await fetch(N8N_WEBHOOK_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "X-WebHook-Token": N8N_WEBHOOK_TOKEN
+       },
       body: JSON.stringify(payload),
     });
 
