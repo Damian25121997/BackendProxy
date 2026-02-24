@@ -119,7 +119,7 @@ app.post("/api/whatsapp-click", rateLimit, validateOrigin, async (req, res) => {
     const {source_url, user_agent, timestamp } = req.body || {};
     const payload = {event: "whatsapp_click", source_url, user_agent, timestamp};
 
-    console.log(JSON.stringify({ts: new Date().toISOString().event: "WHATSAPP_CLICK", path: "/api/whatsapp-click"}));
+    console.log(JSON.stringify({ts: new Date().toISOString(), event: "WHATSAPP_CLICK", path: "/api/whatsapp-click"}));
 
     if(N8N_WHATSAPP_WEBHOOK_URL) {
       const hmacHeaders = generateHmac(payload);
