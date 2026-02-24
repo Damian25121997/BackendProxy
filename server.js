@@ -70,7 +70,7 @@ function validateOrigin(req, res, next) {
 }
 
 // HMAC Signature
-function generate(payload) {
+function generateHmac(payload) {
   if (!HMAC_SECRET) return {};
 
   const timestamp = Date.now().toString();
