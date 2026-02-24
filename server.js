@@ -18,7 +18,7 @@ const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 5;
 
 function rateLimit(req, res, next) {
-  const ip = req.header["x-forwarded-for"]?.split(",")[0].trim() || req.ip;
+  const ip = req.headers["x-forwarded-for"]?.split(",")[0].trim() || req.ip;
   const now = Date.now();
   const entry = rateLimitMap.get(ip);
 
@@ -28,7 +28,7 @@ function rateLimit(req, res, next) {
   }
   entry.count++;
   if (entry.count > RATE_LIMIT_MAX){
-    console.log(JSON.stringify({ts: new Date.toISOString(), event: "RATE_LIMITED",
+    console.log(JSON.stringify({ts: new Date().toISOString(), event: "RATE_LIMITED",
       ip, path: req.path}));
       return res.status(429).json({error: "Too many requests. Try later."});
   }
@@ -58,8 +58,8 @@ app.use((req, res, next) => {
 // Origin Validation
 function validateOrigin(req, res, next) {
   if(!ALLOWED_ORIGIN) return next();
-  const origin = req.header.origin || "";
-  const referer = req.header.referer || "";
+  const origin = req.headers.origin || "";
+  const referer = req.headers.referer || "";
   const allowed = ALLOWED_ORIGIN.replace(/\/$/, "");
 
   if (origin && origin.replace(/\/$/, "") === allowed) return next();
@@ -80,7 +80,7 @@ function generateHmac(payload) {
 
 }
 
-app.post("/api/lead", async (req, res) => {
+app.post("/api/lead", rateLimit, validateOrigin, async (req, res) => {
   try {
     if (!N8N_WEBHOOK_URL) return res.status(500).send("Missing N8N_WEBHOOK_URL");
 
@@ -90,6 +90,7 @@ app.post("/api/lead", async (req, res) => {
     if (!name || !email || !phone || !message) return res.status(400).send("Missing required fields");
 
     const payload = { name, email, phone, message, subject, source_url, user_agent, timestamp };
+    const hmacHeaders = generateHmac(payload);
 
     const r = await fetch(N8N_WEBHOOK_URL, {
       method: "POST",
